@@ -1,0 +1,83 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String           @id @default(cuid())
+  email        String?          @unique
+  isGuest      Boolean          @default(true)
+  sessionToken String?          @unique
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  watchlists   Watchlist[]
+  checkpoints  UserCheckpoint[]
+
+  @@index([sessionToken])
+}
+
+model Watchlist {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String           @default("Main Radar")
+  isDefault   Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  items       WatchlistItem[]
+  checkpoints UserCheckpoint[]
+
+  @@index([userId])
+}
+
+model WatchlistItem {
+  id           String    @id @default(cuid())
+  watchlistId  String
+  watchlist    Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  symbol       String    // e.g. "NVDA", "AAPL"
+  name         String?   // e.g. "NVIDIA Corporation"
+  sector       String?   // e.g. "Technology"
+  sectorEtf   String?   // e.g. "XLK"
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+
+  @@unique([watchlistId, symbol])
+  @@index([symbol])
+}
+
+model UserCheckpoint {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  watchlistId         String
+  watchlist           Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  checkpointTimestamp DateTime  @default(now())
+  label               String?   // e.g. "Manual Checkpoint", "Session Start"
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([userId, watchlistId])
+}
+
+model MarketSnapshot {
+  id             String    @id @default(cuid())
+  symbol         String    // e.g. "NVDA", "SPY", "XLK"
+  price          Float
+  changePercent  Float     // Session change %
+  volume         BigInt    // Cumulative day volume
+  avgDailyVolume BigInt?   // 20-day ADV
+  openPrice      Float?
+  highPrice      Float?
+  lowPrice       Float?
+  previousClose  Float
+  timestamp      DateTime  // Timestamp of the market print
+  provider       String    // "FINNHUB", "ALPHA_VANTAGE", "MOCK"
+  isSynthetic    Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  @@index([symbol, timestamp(sort: Desc)])
+}

@@ -198,7 +198,7 @@ flowchart TD
 
 ### 5.2 Architectural Patterns
 - **Modular Monolith:** All services live in the same codebase under `/src/server/services/`, sharing TypeScript types and database clients without inter-process network overhead.
-- **Hexagonal / Adapter Pattern for Market Data:** An abstract interface `IMarketDataProvider` allows seamless hot-swapping between real external APIs (`LiveMarketDataProvider`) and offline test fixtures (`MockMarketDataProvider`).
+- **Hexagonal / Adapter Pattern for Market Data:** An abstract interface `IMarketDataProvider` allows seamless hot-swapping between local external delayed market quotes (`DelayedMarketDataProvider`, local development only) and offline test fixtures (`DemoMarketDataProvider`). In production and public evaluation environments, external feeds are strictly disabled to comply with exchange redistribution policies, guaranteeing deterministic Demo Mode execution.
 - **Separation of Ingestion and Evaluation:** Ingestion normalizes raw provider quotes into canonical `MarketSnapshot` structures. The `ChangeEngine` is a pure functional pipeline that accepts two snapshots ($T_0, T_1$) plus benchmark context and outputs attention scores.
 
 ---
@@ -629,7 +629,7 @@ While the hackathon implementation is optimized as a lightweight modular monolit
 
 1. **Architectural Simplicity:** The implementation favors a modular monolith and deliberately limited infrastructure to maximize reliability, maintainability, and clarity.
 2. **Market Hours Awareness:** US Equity exchanges trade 9:30 AM – 4:00 PM EST. The system accounts for after-hours and weekend evaluation gracefully.
-3. **Third-Party API Free Tier Constraints:** Live free APIs (Finnhub, Alpha Vantage) have severe rate limits (e.g. 5 calls/min); system must heavily leverage caching and default to the mock provider when quotas are reached.
+3. **Third-Party API & Redistribution Policy Constraints:** The external Market Data provider (`MARKETDATA_LOCAL`) is strictly for local developer evaluation and debugging; it is not licensed for public redistribution. Public judging and production runtimes automatically enforce deterministic Demo Mode.
 
 ---
 
