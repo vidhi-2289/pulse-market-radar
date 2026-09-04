@@ -81,6 +81,7 @@ export async function addAssetToWatchlist(
     name,
     sector,
     sectorEtf,
+    exchange: input.exchange,
     displayOrder: nextOrder,
   });
 }

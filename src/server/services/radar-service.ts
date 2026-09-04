@@ -12,6 +12,8 @@ import {
   WatchlistItem,
 } from '@/types';
 import { evaluateRadarItem } from '../engine/change-engine';
+import { computeAttentionBudget } from '../engine/attention-budget';
+export { computeAttentionBudget };
 import {
   IMarketDataProvider,
   getMarketDataProvider,
@@ -182,6 +184,7 @@ function evaluateRadarInternal(
       notice,
     },
     items: evaluatedItems,
+    attentionBudget: computeAttentionBudget(evaluatedItems, 3),
   };
 }
 

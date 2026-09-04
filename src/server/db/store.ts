@@ -32,6 +32,7 @@ interface MemoryWatchlistItem {
   sector: string | null;
   sectorEtf: string | null;
   displayOrder: number;
+  exchange: string | null;
   createdAt: Date;
 }
 
@@ -159,6 +160,7 @@ export async function createGuestUserWithDefaults(token: string): Promise<{
             sector: i.sector,
             sectorEtf: i.sectorEtf,
             displayOrder: i.displayOrder,
+            exchange: i.exchange,
           })),
         },
         checkpoint: {
@@ -205,6 +207,7 @@ export async function createGuestUserWithDefaults(token: string): Promise<{
     sector: item.sector,
     sectorEtf: item.sectorEtf,
     displayOrder: item.displayOrder,
+    exchange: null,
     createdAt: now,
   }));
 
@@ -277,6 +280,7 @@ export async function findActiveWatchlist(userId: string): Promise<PersistedWatc
             sector: i.sector,
             sectorEtf: i.sectorEtf,
             displayOrder: i.displayOrder,
+            exchange: i.exchange,
           })),
         };
       }
@@ -302,6 +306,7 @@ export async function findActiveWatchlist(userId: string): Promise<PersistedWatc
             sector: i.sector,
             sectorEtf: i.sectorEtf,
             displayOrder: i.displayOrder,
+            exchange: i.exchange,
           })),
       };
     }
@@ -315,7 +320,7 @@ export async function findActiveWatchlist(userId: string): Promise<PersistedWatc
  */
 export async function addWatchlistItem(
   watchlistId: string,
-  data: { symbol: string; name?: string; sector?: string; sectorEtf?: string; displayOrder: number }
+  data: { symbol: string; name?: string; sector?: string; sectorEtf?: string; exchange?: string; displayOrder: number }
 ): Promise<PersistedWatchlist> {
   const upperSymbol = data.symbol.toUpperCase();
 
@@ -328,6 +333,7 @@ export async function addWatchlistItem(
           name: data.name || null,
           sector: data.sector || null,
           sectorEtf: data.sectorEtf || null,
+          exchange: data.exchange || null,
           displayOrder: data.displayOrder,
         },
       });
@@ -350,6 +356,7 @@ export async function addWatchlistItem(
           sector: i.sector,
           sectorEtf: i.sectorEtf,
           displayOrder: i.displayOrder,
+          exchange: i.exchange,
         })),
       };
     } catch (err) {
@@ -367,6 +374,7 @@ export async function addWatchlistItem(
     sector: data.sector || null,
     sectorEtf: data.sectorEtf || null,
     displayOrder: data.displayOrder,
+    exchange: data.exchange || null,
     createdAt: new Date(),
   };
 
@@ -427,6 +435,7 @@ export async function removeWatchlistItem(
           sector: i.sector,
           sectorEtf: i.sectorEtf,
           displayOrder: i.displayOrder,
+          exchange: i.exchange,
         })),
       };
     } catch (err) {
@@ -453,6 +462,7 @@ export async function removeWatchlistItem(
         sector: i.sector,
         sectorEtf: i.sectorEtf,
         displayOrder: i.displayOrder,
+        exchange: i.exchange,
       })),
   };
 }
@@ -495,6 +505,7 @@ export async function restoreDefaultWatchlist(watchlistId: string): Promise<Pers
           sector: i.sector,
           sectorEtf: i.sectorEtf,
           displayOrder: i.displayOrder,
+          exchange: i.exchange,
         })),
       };
     } catch (err) {
@@ -512,6 +523,7 @@ export async function restoreDefaultWatchlist(watchlistId: string): Promise<Pers
     sector: item.sector,
     sectorEtf: item.sectorEtf,
     displayOrder: item.displayOrder,
+    exchange: null,
     createdAt: now,
   }));
 
@@ -529,6 +541,7 @@ export async function restoreDefaultWatchlist(watchlistId: string): Promise<Pers
       sector: i.sector,
       sectorEtf: i.sectorEtf,
       displayOrder: i.displayOrder,
+      exchange: i.exchange,
     })),
   };
 }

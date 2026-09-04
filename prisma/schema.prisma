@@ -40,6 +40,7 @@ model WatchlistItem {
   watchlist    Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
   symbol       String    // e.g. "NVDA", "AAPL"
   name         String?   // e.g. "NVIDIA Corporation"
+  exchange     String?   // e.g. "NASDAQ", "NYSE", "BSE"
   sector       String?   // e.g. "Technology"
   sectorEtf   String?   // e.g. "XLK"
   displayOrder Int       @default(0)

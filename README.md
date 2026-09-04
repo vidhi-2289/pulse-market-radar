@@ -252,6 +252,11 @@ DATABASE_URL="postgresql://user:password@localhost:5432/pulse"
 # If absent or empty, Pulse automatically and safely defaults to guaranteed deterministic DEMO mode.
 MARKETDATA_API_TOKEN=""
 
+# Global Instrument Discovery (Free Tier from https://www.alphavantage.co/)
+# Used server-side for global company & ticker autocomplete search (SYMBOL_SEARCH).
+# Optional: if absent or empty, Pulse safely uses the built-in smart local catalog (NVDA, AAPL, MSFT, etc.).
+ALPHAVANTAGE_API_KEY=""
+
 # Application Mode ("production" | "development" | "demo")
 NEXT_PUBLIC_APP_MODE="demo"
 ```
@@ -276,7 +281,7 @@ Open [http://localhost:3000](http://localhost:3000) to access the radar.
 ## 10. Testing & Verification
 
 ```bash
-# Run all unit, provider, scenario, and persistence tests (73 tests)
+# Run all unit, provider, scenario, persistence, and instrument search tests (92 tests)
 npm test
 
 # Verify zero lint errors or warnings

@@ -9,6 +9,8 @@ import { RadarHeader } from '@/components/header/RadarHeader';
 import { CheckpointBanner } from '@/components/checkpoint/CheckpointBanner';
 import { RadarCard } from '@/components/radar/RadarCard';
 import { CalmHero } from '@/components/radar/CalmHero';
+import { AttentionBudget } from '@/components/radar/AttentionBudget';
+import { computeAttentionBudget } from '@/server/engine/attention-budget';
 import { WatchlistTable } from '@/components/watchlist/WatchlistTable';
 import { StockDetailModal } from '@/components/detail/StockDetailModal';
 import { AlertTriangle, BellRing, Loader2 } from 'lucide-react';
@@ -43,11 +45,12 @@ export default function HomePage() {
         const data = await res.json();
         if (isMounted && data.watchlist?.items) {
           const items: WatchlistItem[] = data.watchlist.items.map(
-            (i: { symbol: string; name: string | null; sector: string | null; sectorEtf: string | null; displayOrder: number }) => ({
+            (i: { symbol: string; name: string | null; sector: string | null; sectorEtf: string | null; exchange?: string | null; displayOrder: number }) => ({
               symbol: i.symbol,
               name: i.name || i.symbol,
               sector: i.sector || 'General',
               sectorEtf: i.sectorEtf || 'SPY',
+              exchange: i.exchange || undefined,
               displayOrder: i.displayOrder,
             })
           );
@@ -121,6 +124,10 @@ export default function HomePage() {
     return activeRadarData.items.filter((item) => item.severity !== 'NOMINAL');
   }, [activeRadarData.items]);
 
+  const attentionBudget = useMemo(() => {
+    return activeRadarData.attentionBudget || computeAttentionBudget(activeRadarData.items, 3);
+  }, [activeRadarData]);
+
   const isCalm = activeAnomalies.length === 0;
 
   // Sync selectedStock if items re-evaluate
@@ -191,32 +198,37 @@ export default function HomePage() {
   }, [selectedStock]);
 
   // Watchlist Addition with persistence
-  const handleAddSymbol = useCallback(async (symbol: string) => {
-    const res = await fetch('/api/watchlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symbol }),
-    });
+  const handleAddSymbol = useCallback(
+    async (input: { symbol: string; name?: string; exchange?: string; sector?: string; sectorEtf?: string } | string) => {
+      const payload = typeof input === 'string' ? { symbol: input } : input;
+      const res = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || `Failed to add "${payload.symbol}"`);
+      }
+
       const data = await res.json();
-      throw new Error(data.error || `Failed to add "${symbol}"`);
-    }
-
-    const data = await res.json();
-    if (data.watchlist?.items) {
-      const items: WatchlistItem[] = data.watchlist.items.map(
-        (i: { symbol: string; name: string | null; sector: string | null; sectorEtf: string | null; displayOrder: number }) => ({
-          symbol: i.symbol,
-          name: i.name || i.symbol,
-          sector: i.sector || 'General',
-          sectorEtf: i.sectorEtf || 'SPY',
-          displayOrder: i.displayOrder,
-        })
-      );
-      setPersistedItems(items);
-    }
-  }, []);
+      if (data.watchlist?.items) {
+        const items: WatchlistItem[] = data.watchlist.items.map(
+          (i: { symbol: string; name: string | null; sector: string | null; sectorEtf: string | null; exchange?: string | null; displayOrder: number }) => ({
+            symbol: i.symbol,
+            name: i.name || i.symbol,
+            sector: i.sector || 'General',
+            sectorEtf: i.sectorEtf || 'SPY',
+            exchange: i.exchange || undefined,
+            displayOrder: i.displayOrder,
+          })
+        );
+        setPersistedItems(items);
+      }
+    },
+    []
+  );
 
   // Restore Default Watchlist with persistence
   const handleRestoreDefaultWatchlist = useCallback(async () => {
@@ -227,11 +239,12 @@ export default function HomePage() {
         const data = await res.json();
         if (data.watchlist?.items) {
           const items: WatchlistItem[] = data.watchlist.items.map(
-            (i: { symbol: string; name: string | null; sector: string | null; sectorEtf: string | null; displayOrder: number }) => ({
+            (i: { symbol: string; name: string | null; sector: string | null; sectorEtf: string | null; exchange?: string | null; displayOrder: number }) => ({
               symbol: i.symbol,
               name: i.name || i.symbol,
               sector: i.sector || 'General',
               sectorEtf: i.sectorEtf || 'SPY',
+              exchange: i.exchange || undefined,
               displayOrder: i.displayOrder,
             })
           );
@@ -296,6 +309,13 @@ export default function HomePage() {
           onAcknowledgeCheckpoint={handleAcknowledgeCheckpoint}
           onResetCheckpoint={handleResetCheckpoint}
           isCustomCheckpoint={isAcknowledged}
+        />
+
+        {/* 2.5 Prioritized Attention Budget Summary */}
+        <AttentionBudget
+          budget={attentionBudget}
+          radarItems={activeRadarData.items}
+          onSelectStock={(selected) => setSelectedStock(selected)}
         />
 
         {/* 3. Attention Radar Feed or Calm State */}

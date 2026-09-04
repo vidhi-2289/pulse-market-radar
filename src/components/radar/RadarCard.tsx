@@ -27,6 +27,7 @@ export const RadarCard: React.FC<RadarCardProps> = ({ item, rank, onSelect }) =>
 
   return (
     <div
+      id={`radar-card-${item.symbol}`}
       onClick={() => onSelect(item)}
       className={`group cursor-pointer rounded-2xl border bg-slate-900/80 p-5 sm:p-6 transition-all duration-200 hover:bg-slate-900 hover:shadow-xl ${
         isCritical

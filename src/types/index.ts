@@ -50,6 +50,7 @@ export interface WatchlistItem {
   sector: string;
   sectorEtf: string; // Benchmark ETF for sector, e.g. "XLK"
   displayOrder: number;
+  exchange?: string;
 }
 
 export interface Checkpoint {
@@ -87,6 +88,7 @@ export interface RadarItemResult {
   name: string;
   sector: string;
   sectorEtf: string;
+  exchange?: string;
   currentPrice: number;
   checkpointPrice: number;
   priceChangePercent: number; // Return since checkpoint
@@ -102,6 +104,24 @@ export interface RadarItemResult {
   freshness: FreshnessStatus;
   reasons: AnomalyReason[];
   sparkline: SparklinePoint[];
+}
+
+export interface AttentionBudgetItem {
+  symbol: string;
+  name: string;
+  severity: Severity;
+  attentionScore: number;
+  headlineReason: string;
+  rank: number;
+  priceChangePercent: number;
+}
+
+export interface AttentionBudget {
+  totalMeaningfulCount: number;
+  budgetCount: number; // 0 to 3
+  items: AttentionBudgetItem[];
+  isCalm: boolean;
+  message: string; // e.g. "3 things worth your attention", "1 thing worth your attention", "Nothing needs your attention."
 }
 
 export interface RadarResponse {
@@ -131,6 +151,7 @@ export interface RadarResponse {
     notice?: string;
   };
   items: RadarItemResult[]; // Sorted descending by attentionScore
+  attentionBudget?: AttentionBudget;
 }
 
 export interface ScenarioDefinition {
@@ -155,6 +176,7 @@ export interface PersistedWatchlistItem {
   sector: string | null;
   sectorEtf: string | null;
   displayOrder: number;
+  exchange?: string | null;
 }
 
 export interface PersistedWatchlist {
@@ -177,4 +199,17 @@ export interface AddWatchlistItemInput {
   name?: string;
   sector?: string;
   sectorEtf?: string;
+  exchange?: string;
+}
+
+export interface InstrumentSearchResult {
+  symbol: string;
+  companyName: string;
+  exchange?: string;
+  region?: string;
+  assetType?: string;
+  currency?: string;
+  matchScore?: number;
+  sector?: string;
+  sectorBenchmark?: string;
 }

@@ -338,6 +338,7 @@ export function evaluateRadarItem(params: {
     return {
       symbol: item.symbol,
       name: item.name,
+      exchange: item.exchange,
       sector: item.sector,
       sectorEtf: item.sectorEtf,
       currentPrice: currentSnapshot.price,
@@ -436,6 +437,7 @@ export function evaluateRadarItem(params: {
   return {
     symbol: item.symbol,
     name: item.name,
+    exchange: item.exchange,
     sector: item.sector,
     sectorEtf: item.sectorEtf,
     currentPrice: currentSnapshot.price,
